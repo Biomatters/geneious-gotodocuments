@@ -26,6 +26,9 @@
     <property name="test-data" location="testdata"/>
     <property name="report" location="report"/>
     <property name="GeneiousFiles" location="GeneiousFiles"/>
+    <condition property="test.exists">
+        <available file="test" type="dir"/>
+    </condition>
 
     <path id="classpath">
         <fileset dir="${lib}"/>
@@ -100,7 +103,8 @@
         <delete file="GeneiousFiles.zip"/>
     </target>
 
-    <target name="compile-tests" depends="compile-plugin">
+
+    <target name="compile-tests" depends="compile-plugin" if="test.exists">
         <javac target="1.6" source="1.6" destdir="${test.classes}" debug="true">
             <classpath>
                 <path refid="classpath"/>
@@ -110,7 +114,9 @@
         </javac>
     </target>
 
-    <target name="test" depends="compile-tests, retrieve-test-runtime-dependencies">
+
+    <target name="test" depends="compile-tests, retrieve-test-runtime-dependencies" if="test.exists">
+
         <junit dir="GeneiousFiles" fork="true" maxmemory="1024M" printsummary="on" timeout="180000">
             <batchtest todir="${report}">
             <fileset dir="${test.classes}">
@@ -160,7 +166,7 @@
     <condition property="GeneiousFiles.exists">
         <available file="${GeneiousFiles}" type="dir"/>
     </condition>
-    <target name="retrieve-test-runtime-dependencies" description="Retrieve the Geneious runtime for running the tests" unless="GeneiousFiles.exists">
+    <target name="retrieve-test-runtime-dependencies" description="Retrieve the Geneious runtime for running the tests" unless="GeneiousFiles.exists" if="test.exists">
        <ivy:retrieve conf="test" type="resource" settingsref="biocode.ivy.config" pattern="${basedir}/[artifact].[ext]"/>
        <unzip src="GeneiousFiles.zip" dest="."/>
     </target>
